@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}
+Lumo AI | Chat
+{% endblock %}
+
+{% block content %}
+<div class="flex w-full h-full bg-[#3d3d3d] font-inter">
+
+    <!-- Left Panel -->
+    <div id="left-panel"
+        class="hidden transition-all lg:relative overflow-hidden lg:block lg:w-[16%] bg-[#262626] border-[1px] border-r-[#6d6d6d] max-h-screen">
+        <div class="w-full h-[16%] p-2 border-b-[1px] border-[#efefef]">
+            <div id="logoHeader" class="flex justify-between mb-5">
+                <span class="text-[#efefef] text-4xl font-arimo" id="logo">Lumo</span>
+                <button id="collapseSideBar"
+                    class="hidden lg:block cursor-pointer font-light text-[#f8f8f8] transition-colors hover:text-[#bdbdbd]">
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                </button>
+                <button id="hideSideBar"
+                    class="lg:hidden cursor-pointer font-light text-[#f8f8f8] transition-colors hover:text-[#bdbdbd] text-2xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex justify-center">
+                <a id="createNewChat" href="{% url 'new_chat' %}"
+                    class="w-8/9 text-center cursor-pointer bg-[#f8f8f8] transition-colors py-1 mb-5 hover:bg-[#bdbdbd] text-[#3d3d3d] rounded-[6px] font-arimo">
+                    New Chat
+                </a>
+            </div>
+        </div>
+        <div class="px-2 mt-5 max-h-[70%] min-h-[70%] text-[#f8f8f8] overflow-y-scroll scrollbar-hide">
+            {% for chat in chats %}
+            <div class="w-full chatLink">
+                {% if current_chat.id == chat.id %}
+                <a class="block w-full px-2 py-2 cursor-pointer rounded bg-[#6d6d6d] truncate"
+                    href="{% url 'chat' user_id=user.id chat_id=chat.id %}">
+                    {{ chat.title }}
+                </a>
+                {% else %}
+                <a class="block w-full px-2 py-2 cursor-pointer rounded hover:bg-[#3d3d3d] truncate"
+                    href="{% url 'chat' user_id=user.id chat_id=chat.id %}">
+                    {{ chat.title }}
+                </a>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        </div>
+        <div class="w-full h-[12%] p-2">
+            <div class="bg-[#3d3d3d] p-2 rounded flex justify-between items-center" id="sidebarFooter">
+                <img class="w-10 rounded-full cursor-pointer" id="profileImg"
+                    src="https://imgs.search.brave.com/1KiyzuDRcHPqmU55ezONAKkAiaxJjIqKAentGsEkpco/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzL2FlLzMx/L2M4L2FlMzFjODEz/M2JhNzUzYTBmZDYx/OGE1MGJmNzhmNTZk/LmpwZw"
+                    alt="profile">
+                <div class="text-[#f8f8f8] h-full cursor-pointer hover:text-[#bdbdbd]" id="moreOptions">
+                    <i class="fa-solid fa-ellipsis"></i>
+                </div>
+                <div id="options"
+                    class="hidden absolute text-[#f8f8f8] bottom-[11%] right-2 lg:left-[68%] bg-[#262626] border-2 hover:bg-[#3d3d3d] cursor-pointer border-[#6d6d6d] rounded px-2">
+                    <form method="post" action="{% url 'logout' %}" class="w-full h-full">
+                        {% csrf_token %}
+                        <button type="submit" class="text-center w-full h-full cursor-pointer">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Right Panel -->
+    <div id="right-panel"
+        class="w-full flex-1 p-2 lg:p-4 h-screen text-white flex flex-col justify-center items-center gap-y-2">
+
+        <!-- Chat container -->
+        <div id="chatsContainer" class="flex-1 lg:p-12 flex flex-col overflow-y-scroll w-full scrollbar-hide">
+            {% for message in messages %}
+            {% if message.isPrompt %}
+            <!-- Prompt -->
+            <div class="flex justify-between my-2">
+                <div></div>
+                <div class="p-4 bg-[#262626] border-2 border-[#6d6d6d] rounded-2xl max-w-9/10 ml-auto">
+                    <p>
+                        {{ message.text }}
+                    </p>
+                </div>
+            </div>
+            {% else %}
+            <!-- Response -->
+            <div class="my-2">
+                <p class="lg:p-4 rounded max-w-9/10 ai-response">
+                    {{ message.text }}
+                </p>
+
+                {% if message.hasMermaid %}
+                <div class="max-w-9/10 relative">
+                    <div class="mermaid cursor-pointer">
+                        {{ message.mermaid }}
+                    </div>
+                    <div class="absolute top-0 right-0">
+                        <button onclick="copyMermaidCode(this, `{{ message.mermaid }}`)"
+                            class="px-2 border-2 border-[#6d6d6d] bg-[#3d3d3d] rounded hover:bg-[#6d6d6d] cursor-pointer"><i
+                                class="fa-solid fa-copy"></i></button>
+                        <button
+                            class="download-png px-2 border-2 border-[#6d6d6d] bg-[#3d3d3d] rounded hover:bg-[#6d6d6d] cursor-pointer"><i
+                                class="fa-solid fa-download"></i></button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Input box -->
+        <div class="bg-[#6d6d6d] rounded-3xl w-full p-4 h-fit">
+            <form method="post"> {% csrf_token %} <div class="w-full"> {{ form.text }} </div>
+                <div class="text-3xl float-end"> <button type="submit" id="submitBtn"><i
+                            class="fa-solid fa-circle-up cursor-pointer transition-colors text-[#f8f8f8] hover:text-[#bdbdbd]"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hamburger :mobile -->
+    <button id="bars"
+        class="lg:hidden transition-transform absolute text-2xl text-[#f8f8f8] hover:text-[#bdbdbd] cursor-pointer top-3 left-3">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+<script>
+    const barsBtn = document.getElementById("bars");
+    const submitBtn = document.getElementById("submitBtn");
+    const hideSideBarBtn = document.getElementById("hideSideBar");
+    const collapseSideBarBtn = document.getElementById("collapseSideBar");
+    const createNewChatBtn = document.getElementById("createNewChat");
+    const moreOptionsBtn = document.getElementById("moreOptions");
+    const options = document.getElementById("options");
+    const leftPanel = document.getElementById("left-panel");
+    const rightPanel = document.getElementById("right-panel");
+    const promptArea = document.getElementById('promptArea');
+    const aiResponses = document.querySelectorAll('.ai-response');
+    const chatsContainer = document.getElementById('chatsContainer');
+
+    mermaid.initialize({ startOnLoad: true, theme: "neutral" });
+
+    promptArea.innerText = ''
+
+    window.onload = () => chatsContainer.scrollTo({ top: chatsContainer.scrollHeight, behavior: 'smooth' });
+
+    submitBtn.addEventListener('click', () => {
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner cursor-progress transition-colors text-[#f8f8f8] hover:text-[#bdbdbd] animate-spin"></i>`
+    })
+
+    barsBtn.addEventListener('click', () => {
+
+        leftPanel.classList.add('w-full')
+        leftPanel.classList.remove('hidden')
+
+        rightPanel.classList.add('hidden')
+        rightPanel.classList.remove('w-full')
+
+        barsBtn.classList.add('hidden')
+    })
+
+    hideSideBarBtn.addEventListener('click', () => {
+        leftPanel.classList.remove('w-full')
+        leftPanel.classList.add('hidden')
+
+        rightPanel.classList.remove('hidden')
+        rightPanel.classList.add('w-full')
+
+        barsBtn.classList.remove('hidden')
+    })
+
+    collapseSideBarBtn.addEventListener('click', () => {
+
+        // back into normal width
+        leftPanel.classList.toggle('lg:w-[5%]')
+        leftPanel.classList.toggle('lg:w-[16%]')
+
+        // display logo
+        document.getElementById('logo').classList.toggle('hidden')
+
+        // Alter header
+        document.getElementById('logoHeader').classList.toggle('justify-center')
+
+        // alter create new chat button
+        createNewChatBtn.classList.toggle('rounded-full')
+        createNewChatBtn.innerHTML = leftPanel.classList.contains('lg:w-[16%]') ? `New Chat` : `<i class="fa-solid fa-plus"></i>`
+
+        // display chat links
+        document.querySelectorAll('.chatLink').forEach(e => e.classList.toggle('hidden'))
+
+        // change footer color and hide more options button
+        document.getElementById('sidebarFooter').classList.toggle('bg-transparent')
+        moreOptionsBtn.classList.toggle('hidden')
+        options.classList.toggle('lg:left-[68%]')
+        options.classList.toggle('lg:left-[0%]')
+
+        // remove event listener on profile image for more options
+        if (leftPanel.classList.contains('lg:w-[16%]')) document.getElementById("profileImg").removeEventListener('click', toggleOptions)
+        else document.getElementById('profileImg').addEventListener('click', toggleOptions)
+    })
+
+    moreOptionsBtn.addEventListener('click', toggleOptions)
+
+    function toggleOptions() {
+        options.classList.toggle('hidden')
+    }
+
+    promptArea.addEventListener('input', (e) => {
+        if (!e.target.value.length) {
+            promptArea.classList.add('h-12')
+            promptArea.classList.remove('h-70')
+        } else {
+            promptArea.classList.add('h-70')
+            promptArea.classList.remove('h-12')
+        }
+    })
+
+    aiResponses.forEach(e => {
+        e.innerHTML = `<pre wrap="true" class='w-full font-inter'>${marked.parse(e.innerHTML.trim())}</pre>`
+    })
+
+    // download diagram as image
+    document.querySelectorAll(".download-png").forEach((e) => {
+        e.addEventListener("click", function () {
+            const mermaidContainer = this.closest('.relative').querySelector('.mermaid');
+            const svgEl = mermaidContainer.querySelector("svg");
+
+            domtoimage.toPng(svgEl, {
+                width: svgEl.clientWidth * 2,
+                height: svgEl.clientHeight * 2,
+                style: {
+                    transform: 'scale(1)',
+                    transformOrigin: 'top center'
+                }
+            })
+                .then((dataUrl) => {
+                    const link = document.createElement("a");
+                    link.href = dataUrl;
+                    link.download = "diagram.png";
+                    link.click();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        });
+    });
+
+    function copyMermaidCode(e, value) {
+        navigator.clipboard.writeText(value)
+            .then(() => {
+                e.innerHTML = `<i class="fa-solid fa-check"></i>`
+                setTimeout(function () {
+                    e.innerHTML = `<i class="fa-solid fa-copy"></i>`
+                }, 800)
+            })
+    }
+</script>
+{% endblock %}

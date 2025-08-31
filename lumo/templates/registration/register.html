@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}
+Lumo AI | Sign Up
+{% endblock %}
+
+{% block content %}
+<div class="bg-[#3d3d3d] w-screen h-screen flex justify-center items-center">
+    <div class="w-[90%] h-[90%] bg-[#262626] rounded-2xl flex justify-evenly items-center">
+        <!-- Left Side -->
+        <div class="w-full h-full font-inter flex justify-center items-center">
+            <form method="post" action="" class="flex flex-col w-full h-full gap-4 items-center justify-center">
+                {% csrf_token %}
+
+                <!-- Show Form Errors -->
+                {% if form.errors %}
+                <div class="w-[80%] lg:w-[60%] bg-red-500/20 border border-red-500 text-red-400 rounded p-2 text-sm">
+                    <ul>
+                        {% for field in form %}
+                        {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <input type="email" name="email"
+                    class="rounded bg-[#6d6d6d] text-[#f8f8f8] w-[80%] lg:w-[60%] p-2 focus:outline-none"
+                    placeholder="Email" required>
+
+                <input type="text" name="username"
+                    class="rounded bg-[#6d6d6d] text-[#f8f8f8] w-[80%] lg:w-[60%] p-2 focus:outline-none"
+                    placeholder="Username" required>
+
+                <!-- Password -->
+                <div class="rounded bg-[#6d6d6d] text-[#f8f8f8] w-[80%] lg:w-[60%] p-3 flex justify-between">
+                    <input id="passwordField" name="password1" type="password"
+                        class="w-[90%] h-full focus:outline-none bg-transparent" placeholder="Password" required>
+                    <div class="flex-1 h-full cursor-pointer flex justify-center items-center"
+                        onclick="togglePasswordVisibility(this, 'passwordField')">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="rounded bg-[#6d6d6d] text-[#f8f8f8] w-[80%] lg:w-[60%] p-3 flex justify-between">
+                    <input id="confirmPasswordField" name="password2" type="password"
+                        class="w-[90%] h-full focus:outline-none bg-transparent" placeholder="Confirm Password"
+                        required>
+                    <div class="flex-1 h-full cursor-pointer flex justify-center items-center"
+                        onclick="togglePasswordVisibility(this, 'confirmPasswordField')">
+                        <i class="fa-solid fa-eye-slash"></i>
+                    </div>
+                </div>
+
+                <div class="w-full flex flex-col items-center gap-2">
+                    <button type="submit"
+                        class="w-[80%] lg:w-[60%] bg-[#f8f8f8] text-[#262626] p-2 hover:bg-[#dcdcdc] cursor-pointer transition-colors rounded">
+                        Create Account
+                    </button>
+                    <p class="text-[#f8f8f8]">
+                        Already have an account?
+                        <a href="{% url 'login' %}" class="underline text-[#6d6d6d]">Login</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Side -->
+        <div class="hidden lg:flex justify-center items-center w-full h-full font-arimo">
+            <div class="text-6xl font-bold bg-gradient-to-br from-[#f8f8f8] to-[#3d3d3d] bg-clip-text text-transparent">
+                I have no limits!
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    function togglePasswordVisibility(btn, inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        if (input.type === "password") {
+            input.type = "text";
+            btn.innerHTML = `<i class="fa-solid fa-eye"></i>`;
+        } else {
+            input.type = "password";
+            btn.innerHTML = `<i class="fa-solid fa-eye-slash"></i>`;
+        }
+    }
+</script>
+{% endblock %}
