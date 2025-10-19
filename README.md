@@ -6,10 +6,10 @@
 
 - [![Python](https://img.shields.io/badge/Python-2B2E3A?logo=python&logoColor=fff)](#)
 - [![Django](https://img.shields.io/badge/Django-2B2E3A?logo=django&logoColor=fff)](#)
+- [![sqlite](https://img.shields.io/badge/sqlite-2B2E3A?logo=sqlite&logoColor=fff)](#)
+- [![uv](https://img.shields.io/badge/uv-2B2E3A?logo=uv&logoColor=fff)](#)
 - [![Jinja](https://img.shields.io/badge/Jinja-2B2E3A?logo=jinja&logoColor=fff)](#)
 - [![Tailwind](https://img.shields.io/badge/Tailwind-2B2E3A?logo=tailwindcss&logoColor=fff)](#)
-- [![uv](https://img.shields.io/badge/uv-2B2E3A?logo=uv&logoColor=fff)](#)
-- [![sqlite](https://img.shields.io/badge/sqlite-2B2E3A?logo=sqlite&logoColor=fff)](#)
 
 ## Project Setup
 
@@ -22,8 +22,14 @@ cd lumoAI
 
 ### Set up the environment with UV
 ```bash
-.venv\Scripts\activate # or source .venv/bin/activate
 uv sync
+.venv\Scripts\activate # or source .venv/bin/activate
+```
+
+### Setup envitment variables (.env)
+
+```env
+OPENAI_API_KEY=
 ```
 
 ### Tailwind Setup
