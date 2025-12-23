@@ -23,22 +23,18 @@ def new_chat_view(request):
 
             response = services.generate_response(request.POST["text"])
 
-            aiResponseInJSON = json.loads(
-                response.replace("```json", "").replace("```", "")
-            )
+            aiResponseInJSON = response
 
-            new_chat = chat.objects.create(
-                title=aiResponseInJSON["chat_name"], user=user
-            )
+            new_chat = chat.objects.create(title=aiResponseInJSON, user=user)
             new_user_prompt_message = message.objects.create(
                 text=request.POST["text"], chat=new_chat, isPrompt=True
             )
             new_ai_response_message = message.objects.create(
-                text=aiResponseInJSON["content"],
+                text=aiResponseInJSON,
                 chat=new_chat,
                 isPrompt=False,
-                hasMermaid=aiResponseInJSON["hasMermaid"],
-                mermaid=aiResponseInJSON["mermaid"],
+                hasMermaid=False,
+                mermaid="",
             )
 
             return redirect(to=f"{user.id}/{new_chat.id}", permanent=True)

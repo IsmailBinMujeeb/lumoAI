@@ -1,8 +1,9 @@
 from django.conf import settings
 from openai import OpenAI
-from puter import chat_completion
+import google.generativeai as genai
 
 client = OpenAI(api_key=settings.OPENAI_API_KEY)
+genai.configure(api_key=settings.GOOGLE_API_KEY)
 
 SYSTEM_INSTRUCTION = """
 You are a specialized AI assistant whose primary function is to create visual diagrams, charts, and architectural representations using Mermaid code. Your expertise covers project architectures, database schemas, flowcharts, sequence diagrams, and other visual documentation, your name is Lumo AI and Syed Ismail build you.
@@ -59,12 +60,16 @@ Remember: Your responses must be valid JSON only. No additional text, explanatio
 
 def generate_response(prompt):
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": SYSTEM_INSTRUCTION},
-            {"role": "user", "content": prompt},
-        ],
-    )
+    # response = client.chat.completions.create(
+    #     model="gpt-4o-mini",
+    #     messages=[
+    #         {"role": "system", "content": SYSTEM_INSTRUCTION},
+    #         {"role": "user", "content": prompt},
+    #     ],
+    # )
 
-    return response.choices[0].message.content
+    model = genai.GenerativeModel("models/gemma-3-27b-it")
+
+    response = model.generate_content(prompt)
+
+    return response.text
