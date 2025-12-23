@@ -29,7 +29,7 @@ uv sync
 ### Setup envitment variables (.env)
 
 ```env
-OPENAI_API_KEY=
+GOOGLE_API_KEY=
 ```
 
 ### Tailwind Setup
